@@ -1,0 +1,101 @@
+import cfscrape
+import json
+from flask import request
+from flask_restplus import Resource, Namespace, fields, abort
+from Servers.AnimeFLV.episodesList import scrapeEpisodeList
+
+cfscraper = cfscrape.create_scraper(delay=10)
+
+animeflv_api = Namespace('AnimeFLV', description='AnimeFLV API')
+
+search_model = animeflv_api.model('Search', {'value': fields.String})
+episodes_list_model = animeflv_api.model('Episodes List', {
+    'last_id': fields.Integer,
+    'slug': fields.String
+})
+
+
+def getList():
+    response = cfscraper.get('https://animeflv.net/api/animes/list')
+    json_file = json.loads(response.text)
+    json_response = []
+    for anime in json_file:
+        json_response.append({
+            'id': anime[0],
+            'title': anime[1],
+            'type': anime[4],
+            'last_id': anime[3],
+            'slug': anime[2]
+        })
+    return json_response
+
+
+@animeflv_api.route('/')
+class Home(Resource):
+    @animeflv_api.doc(description='Index endpoint',
+                      responses={200: 'Server is OK'})
+    def get(self):
+        return {'server': 'AnimeFLV'}
+
+
+@animeflv_api.route('/list')
+class List(Resource):
+    @animeflv_api.doc(description='Get all anime library from AnimeFLV',
+                      responses={
+                          200: 'Request was successful',
+                          500: 'Internal server error'
+                      })
+    def get(self):
+        try:
+            anime_list = getList()
+            return anime_list
+        except:
+            abort(500, 'Something ocurred while retrieving all anime list')
+
+
+@animeflv_api.route('/search')
+class Search(Resource):
+    @animeflv_api.expect(search_model)
+    @animeflv_api.doc(description='Advanced search an anime in AnimeFLV',
+                      responses={
+                          200: 'Request was successful',
+                          400: 'Bad request',
+                          500: 'Internal server error'
+                      },
+                      params={'value': 'String to search in AnimeFLV'})
+    def post(self):
+        params = request.get_json()
+        anime_name = params['value']
+        if not anime_name:
+            abort(400, 'Bad request')
+        try:
+            anime_list = getList()
+            filtered_anime = [anime for anime in anime_list if anime_name in anime['title']]
+            return filtered_anime
+        except:
+            abort(500, 'Something ocurred while searching the anime')
+
+
+@animeflv_api.route('/episodes')
+class Episodes(Resource):
+    @animeflv_api.expect(episodes_list_model)
+    @animeflv_api.doc(description='Search an anime episodes list',
+                      responses={
+                          200: 'Request was successful',
+                          400: 'Bad request',
+                          500: 'Internal server error'
+                      },
+                      params={
+                          'last_id': 'Anime last Id',
+                          'slug': 'Anime name used in AnimeFLV endpoint'
+                      })
+    def post(self):
+        params = request.get_json()
+        last_id = params['last_id']
+        slug = params['slug']
+        if not slug or not last_id:
+            abort(400, 'Bad request')
+        try:
+            return scrapeEpisodeList(last_id, slug)
+        except:
+            abort(500, 'Something ocurred while retrieving the episodes list')
