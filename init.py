@@ -1,5 +1,5 @@
 from flask import Flask
-from flask_restplus import Api, Resource, Namespace
+from flask_restplus import Api, Namespace
 from Servers.AnimeFLV.main import animeflv_api
 from Servers.api import main_api
 
