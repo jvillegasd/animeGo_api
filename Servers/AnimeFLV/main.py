@@ -2,13 +2,15 @@ import cfscrape
 import json
 from flask import request
 from flask_restplus import Resource, Namespace, fields, abort
-from Servers.AnimeFLV.scraper import scrapeEpisodeList, scrapeEpisode
+from Servers.AnimeFLV.scraper import scrapeEpisodeList, scrapeEpisode, scrapeGenre, scrapeGenreList
 
 cfscraper = cfscrape.create_scraper(delay=10)
 
 animeflv_api = Namespace('AnimeFLV', description='AnimeFLV API')
 
-search_model = animeflv_api.model('Search', {'value': fields.String})
+search_model = animeflv_api.model('Search', {
+    'value': fields.String
+})
 episodes_list_model = animeflv_api.model('Episodes List', {
     'last_id': fields.Integer,
     'slug': fields.String
@@ -17,6 +19,9 @@ watch_episode_model = animeflv_api.model('Watch Episode', {
     'id_episode': fields.Integer,
     'slug': fields.String,
     'no_episode': fields.Integer
+})
+genre_model = animeflv_api.model('Genre search', {
+    'type': fields.String
 })
 
 
@@ -45,7 +50,7 @@ class Home(Resource):
 
 @animeflv_api.route('/list')
 class List(Resource):
-    @animeflv_api.doc(description='Get all anime library from AnimeFLV',
+    @animeflv_api.doc(description='Get AnimeFLV anime library',
                       responses={
                           200: 'Request was successful',
                           500: 'Internal server error'
@@ -61,7 +66,7 @@ class List(Resource):
 @animeflv_api.route('/search')
 class Search(Resource):
     @animeflv_api.expect(search_model)
-    @animeflv_api.doc(description='Advanced search an anime in AnimeFLV',
+    @animeflv_api.doc(description='Advanced search for an anime in AnimeFLV',
                       responses={
                           200: 'Request was successful',
                           400: 'Bad request',
@@ -130,3 +135,40 @@ class Watch(Resource):
             return scrapeEpisode(id_episode, slug, no_episode)
         except:
             abort(500, 'Something ocurred while retrieving streaming options')
+
+
+@animeflv_api.route('/genre')
+class Genre(Resource):
+    @animeflv_api.expect(genre_model)
+    @animeflv_api.doc(description='Get animes related with specific genre', 
+                      responses={
+                          200: 'Request was successful',
+                          400: 'Bad request',
+                          500: 'Internal server error'
+                      }, params={
+                          'type': 'Genre type'
+                      })
+    def post(self):
+        params = request.get_json()
+        genre_type = params['type']
+        if not genre_type:
+            abort(400, 'Bad request')
+        try:
+            return scrapeGenre(genre_type)
+        except:
+            abort(500, 'Something ocurred while retrieving animes')
+
+
+@animeflv_api.route('/genre/list')
+class GenreList(Resource):
+    @animeflv_api.doc(description='Get genre list', 
+                      responses={
+                          200: 'Request was successful',
+                          400: 'Bad request',
+                          500: 'Internal server error'
+                      })
+    def get(self):
+        try:
+            return scrapeGenreList()
+        except:
+            abort(500, 'Something ocurred while retrieving genre list')

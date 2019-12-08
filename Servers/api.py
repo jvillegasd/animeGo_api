@@ -7,6 +7,7 @@ class Home(Resource):
     def get(self):
         return {
             'servers': [
-                'AnimeFLV'
+                'AnimeFLV',
+                'JKanime'
             ]
         }
