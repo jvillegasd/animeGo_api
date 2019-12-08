@@ -57,7 +57,7 @@ def scrapeFeed():
         episode = {
             'title': title,
             'slug': slug,
-            'last_id': last_id,
+            'id_episode': last_id,
             'no_episode': no_episode
         }
         feed.append(episode)
@@ -69,12 +69,12 @@ def getEpisodeInfo(li):
     href = a_tag['href']
     title = a_tag.find('strong').text
     splitted_href = href.split('/')
-    last_id = int(splitted_href[2])
+    id_episode = int(splitted_href[2])
     slug_ep_href = splitted_href[3].split('-')
     array_size = len(slug_ep_href)
     no_episode = int(slug_ep_href[array_size - 1])
     slug = splitted_href[3][:-array_size]
-    return title, last_id, slug, no_episode
+    return title, id_episode, slug, no_episode
 
 
 def getPagination(genre):
