@@ -53,11 +53,11 @@ def scrapeFeed():
     li_tag = ep_ul_tag.findAll('li')
     feed = []
     for li in li_tag:
-        title, last_id, slug, no_episode = getEpisodeInfo(li)
+        title, id_episode, slug, no_episode = getEpisodeInfo(li)
         episode = {
             'title': title,
             'slug': slug,
-            'id_episode': last_id,
+            'id_episode': id_episode,
             'no_episode': no_episode
         }
         feed.append(episode)
@@ -72,8 +72,9 @@ def getEpisodeInfo(li):
     id_episode = int(splitted_href[2])
     slug_ep_href = splitted_href[3].split('-')
     array_size = len(slug_ep_href)
+    ep_len = len(slug_ep_href[array_size - 1])
     no_episode = int(slug_ep_href[array_size - 1])
-    slug = splitted_href[3][:-array_size]
+    slug = splitted_href[3][:-(ep_len + 1)]
     return title, id_episode, slug, no_episode
 
 
