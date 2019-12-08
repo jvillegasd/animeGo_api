@@ -30,7 +30,7 @@ def scrapeGenre(genre):
     pagination = getPagination(genre)
     animes = []
     for i in range(1, pagination + 1):
-      animes.append(getResults(genre, i))
+        animes.append(getResults(genre, i))
     return animes
 
 
@@ -42,6 +42,39 @@ def scrapeGenreList():
     genre_option_tag = genre_select_tag.findAll('option')
     genre_list = [option['value'] for option in genre_option_tag]
     return genre_list
+
+
+def scrapeFeed():
+    response = cfscraper.get('https://animeflv.net')
+    html_file = response.content
+    soup = BeautifulSoup(html_file, 'html.parser')
+    wrapper_div_tag = soup.find('div', class_='Wrapper')
+    ep_ul_tag = wrapper_div_tag.find('ul', class_='ListEpisodios')
+    li_tag = ep_ul_tag.findAll('li')
+    feed = []
+    for li in li_tag:
+        title, last_id, slug, no_episode = getEpisodeInfo(li)
+        episode = {
+            'title': title,
+            'slug': slug,
+            'last_id': last_id,
+            'no_episode': no_episode
+        }
+        feed.append(episode)
+    return feed
+
+
+def getEpisodeInfo(li):
+    a_tag = li.find('a')
+    href = a_tag['href']
+    title = a_tag.find('strong').text
+    splitted_href = href.split('/')
+    last_id = int(splitted_href[2])
+    slug_ep_href = splitted_href[3].split('-')
+    array_size = len(slug_ep_href)
+    no_episode = int(slug_ep_href[array_size - 1])
+    slug = splitted_href[3][:-array_size]
+    return title, last_id, slug, no_episode
 
 
 def getPagination(genre):

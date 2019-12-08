@@ -2,7 +2,7 @@ import cfscrape
 import json
 from flask import request
 from flask_restplus import Resource, Namespace, fields, abort
-from Servers.AnimeFLV.scraper import scrapeEpisodeList, scrapeEpisode, scrapeGenre, scrapeGenreList
+from Servers.AnimeFLV.scraper import scrapeEpisodeList, scrapeEpisode, scrapeGenre, scrapeGenreList, scrapeFeed
 
 cfscraper = cfscrape.create_scraper(delay=10)
 
@@ -172,3 +172,17 @@ class GenreList(Resource):
             return scrapeGenreList()
         except:
             abort(500, 'Something ocurred while retrieving genre list')
+
+
+@animeflv_api.route('/feed')
+class Feed(Resource):
+    @animeflv_api.doc(description='Get today feed', responses={
+                          200: 'Request was successful',
+                          400: 'Bad request',
+                          500: 'Internal server error'
+                      })
+    def get(self):
+        try:
+            return scrapeFeed()
+        except:
+            abort(500, 'Something ocurred while retrieving today feed')
