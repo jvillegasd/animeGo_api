@@ -64,8 +64,8 @@ def scrapeFeed():
     return feed
 
 
-def getEpisodeInfo(li):
-    a_tag = li.find('a')
+def getEpisodeInfo(li_tag):
+    a_tag = li_tag.find('a')
     href = a_tag['href']
     title = a_tag.find('strong').text
     splitted_href = href.split('/')
