@@ -1,6 +1,5 @@
 import cfscrape
 from bs4 import BeautifulSoup
-from pyjsparser import parse
 
 cfscraper = cfscrape.create_scraper(delay=10)
 
