@@ -1,5 +1,4 @@
 import cfscrape
-import re
 from bs4 import BeautifulSoup
 from pyjsparser import parse
 
