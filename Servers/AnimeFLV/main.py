@@ -66,7 +66,7 @@ class List(Resource):
 @animeflv_api.route('/search')
 class Search(Resource):
     @animeflv_api.expect(search_model)
-    @animeflv_api.doc(description='Advanced search for an anime in AnimeFLV',
+    @animeflv_api.doc(description='Search for an anime in AnimeFLV',
                       responses={
                           200: 'Request was successful',
                           400: 'Bad request',

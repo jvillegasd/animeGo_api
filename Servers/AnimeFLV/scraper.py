@@ -75,7 +75,7 @@ def getEpisodeInfo(li):
     ep_len = len(slug_ep_href[array_size - 1])
     no_episode = int(slug_ep_href[array_size - 1])
     slug = splitted_href[3][:-(ep_len + 1)]
-    return title, id_episode, slug, no_episode
+    return [title, id_episode, slug, no_episode]
 
 
 def getPagination(genre):
@@ -83,7 +83,8 @@ def getPagination(genre):
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     pagination_ul_tag = soup.find('ul', class_='pagination')
-    pagination_size = len(pagination_ul_tag.findAll('li')) - 2
+    li_tag = pagination_ul_tag.findAll('li')
+    pagination_size = int(li_tag[len(li_tag) - 2].text)
     return pagination_size
 
 
