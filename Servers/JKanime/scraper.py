@@ -9,10 +9,10 @@ def scrapeFeed():
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     div_tag = soup.find('div', class_='overview')
-    feed_a_tag = div_tag.findAll('a')
+    feed_a_array = div_tag.findAll('a')
     feed = []
-    for a in feed_a_tag:
-        title, slug, no_episode = getEpisodeInfo(a)
+    for a_tag in feed_a_array:
+        title, slug, no_episode = getEpisodeInfo(a_tag)
         episode = {
             'title': title,
             'slug': slug,
@@ -28,10 +28,10 @@ def scrapeGenreList():
     soup = BeautifulSoup(html_file, 'html.parser')
     div_tag = soup.find('div', class_='genre-list')
     ul_tag = div_tag.find('ul')
-    li_tag = ul_tag.findAll('li')
+    li_array = ul_tag.findAll('li')
     genre_list = []
-    for li in li_tag:
-        a_tag = li.find('a')
+    for li_tag in li_array:
+        a_tag = li_tag.find('a')
         href = a_tag['href']
         splitted_href = href.split('/')
         genre_list.append(splitted_href[2])
@@ -45,12 +45,12 @@ def scrapeSearch(value):
         response = cfscraper.get('https://jkanime.net/buscar/{}/{}/'.format(value, page))
         html_file = response.text
         soup = BeautifulSoup(html_file, 'html.parser')
-        div_tag = soup.findAll('div', class_='portada-box')
-        if not div_tag:
+        div_array = soup.findAll('div', class_='portada-box')
+        if not div_array:
             break
         page_results = []
-        for div in div_tag:
-            a_tag = div.find('a')
+        for div_tag in div_array:
+            a_tag = div_tag.find('a')
             title, slug, no_episode = getEpisodeInfo(a_tag)
             anime = {
                 'title': title,
@@ -62,9 +62,9 @@ def scrapeSearch(value):
     return results
 
 
-def getEpisodeInfo(a):
-    title = a['title']
-    href = a['href']
+def getEpisodeInfo(a_tag):
+    title = a_tag['title']
+    href = a_tag['href']
     splitted_href = href.split('/')
     slug = splitted_href[3]
     no_episode = splitted_href[4]

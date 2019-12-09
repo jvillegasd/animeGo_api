@@ -39,8 +39,8 @@ def scrapeGenreList():
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     genre_select_tag = soup.find('select', id='genre_select')
-    genre_option_tag = genre_select_tag.findAll('option')
-    genre_list = [option['value'] for option in genre_option_tag]
+    genre_option_array = genre_select_tag.findAll('option')
+    genre_list = [option_tag['value'] for option_tag in genre_option_array]
     return genre_list
 
 
@@ -50,10 +50,10 @@ def scrapeFeed():
     soup = BeautifulSoup(html_file, 'html.parser')
     wrapper_div_tag = soup.find('div', class_='Wrapper')
     ep_ul_tag = wrapper_div_tag.find('ul', class_='ListEpisodios')
-    li_tag = ep_ul_tag.findAll('li')
+    li_array = ep_ul_tag.findAll('li')
     feed = []
-    for li in li_tag:
-        title, id_episode, slug, no_episode = getEpisodeInfo(li)
+    for li_tag in li_array:
+        title, id_episode, slug, no_episode = getEpisodeInfo(li_tag)
         episode = {
             'title': title,
             'slug': slug,
@@ -83,8 +83,8 @@ def getPagination(genre):
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     pagination_ul_tag = soup.find('ul', class_='pagination')
-    li_tag = pagination_ul_tag.findAll('li')
-    pagination_size = int(li_tag[len(li_tag) - 2].text)
+    li_array = pagination_ul_tag.findAll('li')
+    pagination_size = int(li_array[len(li_array) - 2].text)
     return pagination_size
 
 
@@ -92,11 +92,11 @@ def getResults(genre, page):
     response = cfscraper.get('https://animeflv.net/browse?genre[]={}&order=default&page={}'.format(genre, page))
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
-    animes_div_tag = soup.findAll('div', class_='Description')
+    animes_div_array = soup.findAll('div', class_='Description')
     results = []
-    for div in animes_div_tag:
-        anime_title = div.find('strong').text
-        anime_href = div.find('a', class_='Button Vrnmlk')['href']
+    for div_tag in animes_div_array:
+        anime_title = div_tag.find('strong').text
+        anime_href = div_tag.find('a', class_='Button Vrnmlk')['href']
         splitted_href = anime_href.split('/')
         last_id = splitted_href[2]
         slug = splitted_href[3]
