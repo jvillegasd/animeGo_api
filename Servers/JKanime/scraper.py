@@ -53,8 +53,8 @@ def scrapeSearch(value):
 def scrapeList():
     results = []
     for letter in ascii_uppercase:
-        results.append(getSearchResults(letter, 'letra'))
-    results.append(getSearchResults('0-9', 'letra'))
+        results.extend(getSearchResults(letter, 'letra'))
+    results.extend(getSearchResults('0-9', 'letra'))
     return results
 
 
@@ -150,7 +150,7 @@ def getEpisodes(endpoint, pagination):
         json_response = response.json()
         pag_episodes = json_response
         episodes_info = [{'no_episode': episode['number']} for episode in pag_episodes]
-        episodes.append(episodes_info)
+        episodes.extend(episodes_info)
     return episodes
 
 
@@ -194,7 +194,7 @@ def getSearchResults(value, option):
             if not slug:
                 continue
             page_results.append(anime)
-        results.append(page_results)
+        results.extend(page_results)
         page+=1
     return results
 
