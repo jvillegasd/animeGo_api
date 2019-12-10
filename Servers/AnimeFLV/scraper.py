@@ -7,6 +7,8 @@ cfscraper = cfscrape.create_scraper(delay=10)
 
 def scrapeEpisodeList(last_id, slug):
     response = cfscraper.get('https://animeflv.net/anime/{}/{}'.format(last_id, slug))
+    if response.status_code != 200:
+        return []
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     episodes = getEpisodes(soup)
@@ -21,6 +23,8 @@ def scrapeEpisodeList(last_id, slug):
 
 def scrapeEpisode(id_episode, slug, no_episode):
     response = cfscraper.get('https://animeflv.net/ver/{}/{}-{}'.format(id_episode, slug, no_episode))
+    if response.status_code != 200:
+        return []
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     return getStreamOptions(soup)
@@ -36,6 +40,8 @@ def scrapeGenre(genre):
 
 def scrapeGenreList():
     response = cfscraper.get('https://animeflv.net/browse')
+    if response.status_code != 200:
+        return []
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     genre_select_tag = soup.find('select', id='genre_select')
@@ -46,6 +52,8 @@ def scrapeGenreList():
 
 def scrapeFeed():
     response = cfscraper.get('https://animeflv.net')
+    if response.status_code != 200:
+        return []
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     wrapper_div_tag = soup.find('div', class_='Wrapper')
@@ -80,6 +88,8 @@ def getEpisodeInfo(li_tag):
 
 def getPagination(genre):
     response = cfscraper.get('https://animeflv.net/browse?genre[]={}&order=default&page=1'.format(genre))
+    if response.status_code != 200:
+        return []
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     pagination_ul_tag = soup.find('ul', class_='pagination')
@@ -90,6 +100,8 @@ def getPagination(genre):
 
 def getResults(genre, page):
     response = cfscraper.get('https://animeflv.net/browse?genre[]={}&order=default&page={}'.format(genre, page))
+    if response.status_code != 200:
+        return []
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     animes_div_array = soup.findAll('div', class_='Description')

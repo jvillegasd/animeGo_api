@@ -6,8 +6,13 @@ main_api = Namespace('api', description='Index of main API')
 class Home(Resource):
     def get(self):
         return {
-            'servers': [
-                'AnimeFLV',
-                'JKanime'
-            ]
+            'servers': {
+                'Español': [
+                    'AnimeFLV',
+                    'JKanime'
+                ],
+                'English': [
+                    '9anime'
+                ]
+            }
         }

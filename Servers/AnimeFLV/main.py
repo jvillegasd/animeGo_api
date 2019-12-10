@@ -8,19 +8,19 @@ cfscraper = cfscrape.create_scraper(delay=10)
 
 animeflv_api = Namespace('AnimeFLV', description='AnimeFLV API')
 
-search_model = animeflv_api.model('Search', {
+search_model = animeflv_api.model('Search AnimeFLV', {
     'value': fields.String
 })
-episodes_list_model = animeflv_api.model('Episodes List', {
+episodes_list_model = animeflv_api.model('Episodes List AnimeFLV', {
     'last_id': fields.Integer,
     'slug': fields.String
 })
-watch_episode_model = animeflv_api.model('Watch Episode', {
+watch_episode_model = animeflv_api.model('Watch Episode AnimeFLV', {
     'id_episode': fields.Integer,
     'slug': fields.String,
     'no_episode': fields.Integer
 })
-genre_model = animeflv_api.model('Genre search', {
+genre_model = animeflv_api.model('Genre search AnimeFLV', {
     'type': fields.String
 })
 
@@ -75,12 +75,12 @@ class Search(Resource):
                       params={'value': 'String to search in AnimeFLV'})
     def post(self):
         params = request.get_json()
-        anime_name = params['value']
+        anime_name = params['value'].lower()
         if not anime_name:
             abort(400, 'Bad request')
         try:
             anime_list = getList()
-            filtered_anime = [anime for anime in anime_list if anime_name in anime['title']]
+            filtered_anime = [anime for anime in anime_list if anime_name in anime['title'].lower()]
             return filtered_anime
         except:
             abort(500, 'Something ocurred while searching the anime')
