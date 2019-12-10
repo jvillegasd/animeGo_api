@@ -4,9 +4,11 @@ from bs4 import BeautifulSoup
 from pyjsparser import parse
 
 cfscraper = cfscrape.create_scraper(delay=10)
+headers = {
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'}
 
 def scrapeEpisodeList(last_id, slug):
-    response = cfscraper.get('https://animeflv.net/anime/{}/{}'.format(last_id, slug))
+    response = cfscraper.get('https://animeflv.net/anime/{}/{}'.format(last_id, slug), headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -22,7 +24,7 @@ def scrapeEpisodeList(last_id, slug):
 
 
 def scrapeEpisode(id_episode, slug, no_episode):
-    response = cfscraper.get('https://animeflv.net/ver/{}/{}-{}'.format(id_episode, slug, no_episode))
+    response = cfscraper.get('https://animeflv.net/ver/{}/{}-{}'.format(id_episode, slug, no_episode), headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -39,7 +41,7 @@ def scrapeGenre(genre):
 
 
 def scrapeGenreList():
-    response = cfscraper.get('https://animeflv.net/browse')
+    response = cfscraper.get('https://animeflv.net/browse', headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -51,7 +53,7 @@ def scrapeGenreList():
 
 
 def scrapeFeed():
-    response = cfscraper.get('https://animeflv.net')
+    response = cfscraper.get('https://animeflv.net', headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -87,7 +89,7 @@ def getEpisodeInfo(li_tag):
 
 
 def getPagination(genre):
-    response = cfscraper.get('https://animeflv.net/browse?genre[]={}&order=default&page=1'.format(genre))
+    response = cfscraper.get('https://animeflv.net/browse?genre[]={}&order=default&page=1'.format(genre), headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -99,7 +101,7 @@ def getPagination(genre):
 
 
 def getResults(genre, page):
-    response = cfscraper.get('https://animeflv.net/browse?genre[]={}&order=default&page={}'.format(genre, page))
+    response = cfscraper.get('https://animeflv.net/browse?genre[]={}&order=default&page={}'.format(genre, page), headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content

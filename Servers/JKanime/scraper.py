@@ -5,10 +5,11 @@ from string import ascii_uppercase
 from pyjsparser import parse
 
 cfscraper = cfscrape.create_scraper(delay=10)
-
+headers = {
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'}
 
 def scrapeFeed():
-    response = cfscraper.get('https://jkanime.net')
+    response = cfscraper.get('https://jkanime.net', headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -28,7 +29,7 @@ def scrapeFeed():
 
 
 def scrapeGenreList():
-    response = cfscraper.get('https://jkanime.net')
+    response = cfscraper.get('https://jkanime.net', headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -62,7 +63,7 @@ def scrapeGenre(value):
 
 
 def scrapeEpisodeList(slug):
-    response = cfscraper.get('https://jkanime.net/{}/'.format(slug))
+    response = cfscraper.get('https://jkanime.net/{}/'.format(slug), headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -80,7 +81,7 @@ def scrapeEpisodeList(slug):
     
 
 def scrapeEpisode(slug, no_episode):
-    response = cfscraper.get('https://jkanime.net/{}/{}/'.format(slug, no_episode))
+    response = cfscraper.get('https://jkanime.net/{}/{}/'.format(slug, no_episode), headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -143,7 +144,7 @@ def getEpisodeEndpoint(soup):
 def getEpisodes(endpoint, pagination):
     episodes = []
     for i in range(1, pagination + 1):
-        response = cfscraper.get(endpoint.format(i))
+        response = cfscraper.get(endpoint.format(i), headers=headers)
         if response.status_code != 200:
             continue
         json_response = response.json()
@@ -174,7 +175,7 @@ def getSearchResults(value, option):
     page = 1
     results = []
     while True:
-        response = cfscraper.get('https://jkanime.net/{}/{}/{}/'.format(option, value, page))
+        response = cfscraper.get('https://jkanime.net/{}/{}/{}/'.format(option, value, page), headers=headers)
         if response.status_code != 200:
             return []
         html_file = response.text

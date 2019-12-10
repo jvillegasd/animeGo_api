@@ -1,9 +1,6 @@
-import cfscrape
 from flask import request
 from flask_restplus import Namespace, Resource, abort, fields
 from Servers.JKanime.scraper import scrapeFeed, scrapeGenreList, scrapeSearch, scrapeList, scrapeGenre, scrapeEpisodeList, scrapeEpisode
-
-cfscraper = cfscrape.create_scraper(delay=10)
 
 jkanime_api = Namespace('JKanime', description='JKanime API')
 
