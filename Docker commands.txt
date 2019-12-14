@@ -3,10 +3,16 @@ docker run -d -p [machine_port:docker:port] --net [network name] --name [image c
 
 *) Create a ngrok container:
 First of all, you need to create a container with the same network ngrok will use to expose web app
-docker run -d -p 4040 --net [network name] --name [image custom name] [image name] http [container to expose name]:[container to expose port]
+docker run -d -p 4040:4040 --net [network name] --name ngrok wernight/ngrok ngrok http [container to expose name]:[container to expose port]
+
+*) Create a ngrok container if you want to ser your ngrok's account:
+docker run -d -p 4040:4040 --net ngrok_animego_api -e NGROK_USERNAME="C9-LinkRs" -e NGROK_PASSWORD="30zeldafan1998" -e NGROK_AUTH="1Uq8449mdiGUyQmgzBbg40GPUZO_7etoycRoQSfgQv6JFRhPx" --name ngrok wernight/ngrok  ngrok http animego_api:5000
 
 *) Check ngrok tunnels:
 curl $(docker port ngrok 4040)/api/tunnels
+
+*) Set ngrok auth token:
+sudo docker exec -it [ngrok container id] ngrok authtoken [token]
 
 *) Get lastest ngrok image:
 docker pull wernight/ngrok:latest

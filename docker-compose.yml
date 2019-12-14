@@ -1,0 +1,26 @@
+version: '3.3'
+services:
+  nginx:
+    image: nginx:1.16.1
+    container_name: nginx
+    depends_on:
+      - flask
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - api-network
+    ports:
+      - 80:80
+  flask:
+    build:
+      context: ./
+      dockerfile: animego_Dockerfile
+    container_name: animego_api
+    networks:
+      api-network:
+        aliases:
+          - animego_api
+    ports:
+      - 8080:5000
+networks:
+  api-network:

@@ -1,4 +1,4 @@
-FROM python:3.7.1
+FROM python:3.7-alpine as base
 
 LABEL Author="LinkRs"
 LABEL version="1.0"
@@ -16,7 +16,5 @@ ADD . /api
 
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
-
-EXPOSE 5000
 
 CMD python3 init.py
