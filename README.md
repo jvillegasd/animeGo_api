@@ -1,6 +1,13 @@
 # animeGo_api
 My Restful API for my mobile app animeGo. <br>
-This RestFul API web scrapes spanish and english anime sites. API docs on Swagger JSON. <br>
-1. Running the web app <br>
-All you have to do is to run the Docker compose file for setting the dockers. Then, you can consume the API by your IP. This is because a Nginx image is used as a reverse proxy for the Flask web app deployment. <br>
-PD: Ports 80 and 8080 are required.
+This RestFul API web scrapes spanish and english anime sites.
+# 1. Running the web app <br>
+This web application uses Docker for deployment. There are two containers over the same network. One of them is the Flask Image that is the API. The another one is a Nginx Image configured as a reverse proxy for Flask container deployment. <br>
+**Ports 80 and 8080 are required**
+
+## 1.1 Docker commands to API RestFul deployment <br>
+```
+docker-compose up -d
+```
+# 2. API Documentation <br>
+The endpoint ```http://{your host ip}/swagger.json``` gives you the documentation. Also, you can read it in ```api_doc.json``` file on this repo.
