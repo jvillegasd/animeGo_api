@@ -32,3 +32,6 @@ docker images
 
 *) Create a network:
 docker network create [network name]
+
+*) Docker compose:
+docker-compose up -d
