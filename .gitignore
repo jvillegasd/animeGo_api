@@ -4,3 +4,5 @@ bin
 lib
 share
 include/
+Servers/cache.py
+Servers/redis_params.py
