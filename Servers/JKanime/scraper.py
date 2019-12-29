@@ -1,15 +1,31 @@
 import cfscrape
 import re
+from random import choice
 from bs4 import BeautifulSoup
 from string import ascii_uppercase
 from pyjsparser import parse
 
-cfscraper = cfscrape.create_scraper(delay=10)
-headers = {
-    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'}
+cfscraper = cfscrape.create_scraper(delay=12)
+user_agents = ['Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14',
+                 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36']
+
+
+def randomUserAgent():
+    return {
+      'user-agent': choice(user_agents)
+    }
 
 def scrapeFeed():
-    response = cfscraper.get('https://jkanime.net', headers=headers)
+    response = cfscraper.get('https://jkanime.net', headers=randomUserAgent())
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -18,18 +34,19 @@ def scrapeFeed():
     feed_a_array = div_tag.findAll('a')
     feed = []
     for a_tag in feed_a_array:
-        title, slug, no_episode = getEpisodeInfo(a_tag)
+        title, slug, no_episode, image = getEpisodeInfo(a_tag)
         episode = {
             'title': title,
             'slug': slug,
-            'no_episode': no_episode
+            'no_episode': no_episode,
+            'image': image
         }
         feed.append(episode)
     return feed
 
 
 def scrapeGenreList():
-    response = cfscraper.get('https://jkanime.net', headers=headers)
+    response = cfscraper.get('https://jkanime.net', headers=randomUserAgent())
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -55,7 +72,7 @@ def scrapeGenre(value, page):
 
 
 def scrapeEpisodeList(slug, page):
-    response = cfscraper.get('https://jkanime.net/{}/'.format(slug), headers=headers)
+    response = cfscraper.get('https://jkanime.net/{}/'.format(slug), headers=randomUserAgent())
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -72,7 +89,7 @@ def scrapeEpisodeList(slug, page):
     
 
 def scrapeEpisode(slug, no_episode):
-    response = cfscraper.get('https://jkanime.net/{}/{}/'.format(slug, no_episode), headers=headers)
+    response = cfscraper.get('https://jkanime.net/{}/{}/'.format(slug, no_episode), headers=randomUserAgent())
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -95,6 +112,35 @@ def scrapeEpisode(slug, no_episode):
         }
         streaming_options.append(server_info)
     return streaming_options
+
+
+def scrapeLastAnimeAdded():
+    response = cfscraper.get('https://jkanime.net', headers=randomUserAgent())
+    if response.status_code != []:
+        return []
+    html_file = response.content
+    soup = BeautifulSoup(html_file, 'html.parser')
+    div_content_box = soup.find('div', class_='content-box')
+    div_array = div_content_box.findAll('div', class_='portada-box')
+    last_anime_added = []
+    for div_tag in div_array:
+        a_tag = div_tag.find('a')
+        title, slug, image, description = getLastAnimeInfo(a_tag)
+        anime = {
+          'title': title,
+          'slug': slug,
+          'description': description,
+          'image': image
+        }
+
+
+def getLastAnimeInfo(a_tag):
+    title = a_tag['title']
+    splitted_href = a_tag['href'].split('/')
+    slug = splitted_href[3]
+    image = (a_tag.find('img'))['src']
+    description = 'Sipnosis disponible en su pagina respectiva.'
+    return [title, slug, image, description]
 
 
 def getStreamingOptions(iframe_array):
@@ -127,7 +173,7 @@ def getEpisodeEndpoint(soup):
 
 
 def getEpisodes(endpoint, page):
-    response = cfscraper.get(endpoint.format(page), headers=headers)
+    response = cfscraper.get(endpoint.format(page), headers=randomUserAgent())
     if response.status_code != 200:
         return []
     json_response = response.json()
@@ -142,7 +188,8 @@ def getEpisodeInfo(a_tag):
     splitted_href = href.split('/')
     slug = splitted_href[3]
     no_episode = splitted_href[4]
-    return title, slug, no_episode
+    image = (a_tag.find('img'))['src']
+    return title, slug, no_episode, image
 
 
 def getAnimeInfo(soup):
@@ -154,7 +201,7 @@ def getAnimeInfo(soup):
 
 
 def getSearchResults(value, option, page):
-    response = cfscraper.get('https://jkanime.net/{}/{}/{}/'.format(option, value, page), headers=headers)
+    response = cfscraper.get('https://jkanime.net/{}/{}/{}/'.format(option, value, page), headers=randomUserAgent())
     if response.status_code != 200:
         return []
     html_file = response.text
