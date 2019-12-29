@@ -1,14 +1,53 @@
 import cfscrape
 import re
+import json
+from random import choice
 from bs4 import BeautifulSoup
 from pyjsparser import parse
 
-cfscraper = cfscrape.create_scraper(delay=10)
-headers = {
-    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'}
+cfscraper = cfscrape.create_scraper(delay=12)
+user_agents = ['Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/602.2.14 (KHTML, like Gecko) Version/10.0.1 Safari/602.2.14',
+                 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
+                 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0',
+                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36']
+
+
+def randomUserAgent():
+    return {
+      'user-agent': choice(user_agents)
+    }
+
+def scrapeLastAnimeAdded():
+    response = cfscraper.get('https://animeflv.net/', headers=randomUserAgent())
+    if response.status_code != 200:
+        return []
+    html_file = response.content
+    soup = BeautifulSoup(html_file, 'html.parser')
+    ul_tag = soup.find('ul', class_='ListAnimes')
+    li_array = ul_tag.findAll('li')
+    last_anime_list = []
+    for li_tag in li_array:
+        title, slug, last_id, description, image = getLastAnimeInfo(li_tag)
+        anime = {
+          'title': title,
+          'slug': slug,
+          'last_id': last_id,
+          'description': description,
+          'image': image
+        }
+        last_anime_list.append(anime)
+    return last_anime_list
+
 
 def scrapeEpisodeList(last_id, slug):
-    response = cfscraper.get('https://animeflv.net/anime/{}/{}'.format(last_id, slug), headers=headers)
+    response = cfscraper.get('https://animeflv.net/anime/{}/{}'.format(last_id, slug), headers=randomUserAgent())
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -24,7 +63,7 @@ def scrapeEpisodeList(last_id, slug):
 
 
 def scrapeEpisode(id_episode, slug, no_episode):
-    response = cfscraper.get('https://animeflv.net/ver/{}/{}-{}'.format(id_episode, slug, no_episode), headers=headers)
+    response = cfscraper.get('https://animeflv.net/ver/{}/{}-{}'.format(id_episode, slug, no_episode), headers=randomUserAgent())
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -38,7 +77,7 @@ def scrapeGenre(genre, page):
 
 
 def scrapeGenreList():
-    response = cfscraper.get('https://animeflv.net/browse', headers=headers)
+    response = cfscraper.get('https://animeflv.net/browse', headers=randomUserAgent())
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -50,7 +89,7 @@ def scrapeGenreList():
 
 
 def scrapeFeed():
-    response = cfscraper.get('https://animeflv.net', headers=headers)
+    response = cfscraper.get('https://animeflv.net', headers=randomUserAgent())
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -60,12 +99,13 @@ def scrapeFeed():
     li_array = ep_ul_tag.findAll('li')
     feed = []
     for li_tag in li_array:
-        title, id_episode, slug, no_episode = getEpisodeInfo(li_tag)
+        title, id_episode, slug, no_episode, image = getEpisodeInfo(li_tag)
         episode = {
             'title': title,
             'slug': slug,
             'id_episode': id_episode,
-            'no_episode': no_episode
+            'no_episode': no_episode,
+            'image': image
         }
         feed.append(episode)
     return feed
@@ -73,6 +113,8 @@ def scrapeFeed():
 
 def getEpisodeInfo(li_tag):
     a_tag = li_tag.find('a')
+    span_image = a_tag.find('span', class_='Image')
+    image = 'https://animeflv.net' + (span_image.find('img'))['src']
     href = a_tag['href']
     title = a_tag.find('strong').text
     splitted_href = href.split('/')
@@ -82,23 +124,11 @@ def getEpisodeInfo(li_tag):
     ep_len = len(slug_ep_href[array_size - 1])
     no_episode = int(slug_ep_href[array_size - 1])
     slug = splitted_href[3][:-(ep_len + 1)]
-    return [title, id_episode, slug, no_episode]
-
-
-def getPagination(genre):
-    response = cfscraper.get('https://animeflv.net/browse?genre[]={}&order=default&page=1'.format(genre), headers=headers)
-    if response.status_code != 200:
-        return []
-    html_file = response.content
-    soup = BeautifulSoup(html_file, 'html.parser')
-    pagination_ul_tag = soup.find('ul', class_='pagination')
-    li_array = pagination_ul_tag.findAll('li')
-    pagination_size = int(li_array[len(li_array) - 2].text)
-    return pagination_size
+    return [title, id_episode, slug, no_episode, image]
 
 
 def getResults(genre, page):
-    response = cfscraper.get('https://animeflv.net/browse?genre[]={}&order=default&page={}'.format(genre, page), headers=headers)
+    response = cfscraper.get('https://animeflv.net/browse?genre[]={}&order=default&page={}'.format(genre, page), headers=randomUserAgent())
     if response.status_code != 200:
         return []
     html_file = response.content
@@ -162,3 +192,37 @@ def getEpisodes(soup):
         episodes.append(episode_info)
     episodes.reverse()
     return episodes
+
+
+def getLastAnimeInfo(li_tag):
+    figure_tag = li_tag.find('figure')
+    image = 'https://animeflv.net' + (figure_tag.find('img'))['src']
+    a_tag = li_tag.find('a')
+    a_href = a_tag['href']
+    splitted_href = a_href.split('/')
+    last_id = int(splitted_href[2])
+    slug = splitted_href[3]
+    div_description = li_tag.find('div', class_='Description')
+    div_title = div_description.find('div', class_='Title')
+    title = (div_title.find('strong')).text
+    description = ""
+    p_array = div_description.findAll('p')
+    for p_tag in p_array:
+        if not p_tag.find('span'):
+            description = p_tag.text
+            break
+    return [title, slug, last_id, description, image]
+
+def getList():
+  response = cfscraper.get('https://animeflv.net/api/animes/list', headers=randomUserAgent())
+  json_file = json.loads(response.text)
+  json_response = []
+  for anime in json_file:
+      json_response.append({
+          'id': anime[0],
+          'title': anime[1],
+          'type': anime[4],
+          'last_id': anime[3],
+          'slug': anime[2]
+      })
+  return json_response

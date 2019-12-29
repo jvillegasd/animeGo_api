@@ -1,6 +1,6 @@
 from flask import request
 from flask_restplus import Namespace, Resource, abort, fields
-from Servers.JKanime.scraper import scrapeFeed, scrapeGenreList, scrapeSearch, scrapeGenre, scrapeEpisodeList, scrapeEpisode
+from Servers.JKanime.scraper import scrapeFeed, scrapeGenreList, scrapeSearch, scrapeGenre, scrapeEpisodeList, scrapeEpisode, scrapeLastAnimeAdded
 
 jkanime_api = Namespace('JKanime', description='JKanime API')
 
@@ -154,3 +154,17 @@ class Watch(Resource):
             return scrapeEpisode(slug, no_episode)
         except:
             abort(500, 'Something ocurred while retrieving streaming options')
+
+
+@jkanime_api.route('/last')
+class LastAnimeAdded(Resource):
+    @jkanime_api.doc(description='Get last anime added', responses={
+                          200: 'Request was successful',
+                          400: 'Bad request',
+                          500: 'Internal server error'
+                    })
+    def get(self):
+        try:
+            return scrapeLastAnimeAdded()
+        except:
+            abort(500, 'Something ocurred while retrieving last anime added')

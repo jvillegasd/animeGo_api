@@ -1,8 +1,7 @@
 import cfscrape
-import json
 from flask import request
 from flask_restplus import Resource, Namespace, fields, abort
-from Servers.AnimeFLV.scraper import scrapeEpisodeList, scrapeEpisode, scrapeGenre, scrapeGenreList, scrapeFeed
+from Servers.AnimeFLV.scraper import getList, scrapeEpisodeList, scrapeEpisode, scrapeGenre, scrapeGenreList, scrapeFeed, scrapeLastAnimeAdded
 
 cfscraper = cfscrape.create_scraper(delay=10)
 
@@ -26,23 +25,6 @@ genre_model = animeflv_api.model('Genre search AnimeFLV', {
     'type': fields.String,
     'page': fields.Integer
 })
-
-
-def getList():
-  headers = {
-    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'}
-  response = cfscraper.get('https://animeflv.net/api/animes/list', headers=headers)
-  json_file = json.loads(response.text)
-  json_response = []
-  for anime in json_file:
-      json_response.append({
-          'id': anime[0],
-          'title': anime[1],
-          'type': anime[4],
-          'last_id': anime[3],
-          'slug': anime[2]
-      })
-  return json_response
 
 
 @animeflv_api.route('/')
@@ -195,3 +177,17 @@ class Feed(Resource):
             return scrapeFeed()
         except:
             abort(500, 'Something ocurred while retrieving today feed')
+
+
+@animeflv_api.route('/last')
+class LastAnimeAdded(Resource):
+    @animeflv_api.doc(description='Get last anime added', responses={
+                          200: 'Request was successful',
+                          400: 'Bad request',
+                          500: 'Internal server error'
+                      })
+    def get(self):
+        try:
+            return scrapeLastAnimeAdded()
+        except:
+            abort(500, 'Something ocurred while retrieving last anime added')
