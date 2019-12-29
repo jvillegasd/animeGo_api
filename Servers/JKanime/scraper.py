@@ -124,7 +124,7 @@ def scrapeLastAnimeAdded():
     div_array = div_content_box.findAll('div', class_='portada-box')
     last_anime_added = []
     for div_tag in div_array:
-        a_tag = div_tag.find('a')
+        a_tag = div_tag.find('a', {'rel': 'nofollow'})
         title, slug, image, description = getLastAnimeInfo(a_tag)
         anime = {
           'title': title,
