@@ -9,11 +9,13 @@ cfscraper = cfscrape.create_scraper(delay=10)
 animeflv_api = Namespace('AnimeFLV', description='AnimeFLV API')
 
 search_model = animeflv_api.model('Search AnimeFLV', {
-    'value': fields.String
+    'value': fields.String,
+    'page': fields.Integer
 })
 episodes_list_model = animeflv_api.model('Episodes List AnimeFLV', {
     'last_id': fields.Integer,
-    'slug': fields.String
+    'slug': fields.String,
+    'page': fields.Integer
 })
 watch_episode_model = animeflv_api.model('Watch Episode AnimeFLV', {
     'id_episode': fields.Integer,
@@ -21,7 +23,8 @@ watch_episode_model = animeflv_api.model('Watch Episode AnimeFLV', {
     'no_episode': fields.Integer
 })
 genre_model = animeflv_api.model('Genre search AnimeFLV', {
-    'type': fields.String
+    'type': fields.String,
+    'page': fields.Integer
 })
 
 
@@ -50,21 +53,6 @@ class Home(Resource):
         return {'server': 'AnimeFLV'}
 
 
-@animeflv_api.route('/list')
-class List(Resource):
-    @animeflv_api.doc(description='Get AnimeFLV anime library',
-                      responses={
-                          200: 'Request was successful',
-                          500: 'Internal server error'
-                      })
-    def get(self):
-        try:
-            anime_list = getList()
-            return anime_list
-        except:
-            abort(500, 'Something ocurred while retrieving all anime list')
-
-
 @animeflv_api.route('/search')
 class Search(Resource):
     @animeflv_api.expect(search_model)
@@ -74,15 +62,24 @@ class Search(Resource):
                           400: 'Bad request',
                           500: 'Internal server error'
                       },
-                      params={'value': 'String to search in AnimeFLV'})
+                      params={
+                        'value': 'String to search in AnimeFLV',
+                        'page': 'Current page'
+                      })
     def post(self):
         params = request.get_json()
         anime_name = params['value'].lower()
-        if not anime_name:
+        page = params['page']
+        if not anime_name or not page:
             abort(400, 'Bad request')
         try:
             anime_list = getList()
-            filtered_anime = [anime for anime in anime_list if anime_name in anime['title'].lower()]
+            directory = [anime for anime in anime_list if anime_name in anime['title'].lower()]
+            page-=1
+            length = len(directory)
+            start_range = page * 24
+            end_range = start_range + 24 if start_range + 24 < length else length
+            filtered_anime = [directory[i] for i in range(start_range, end_range)]
             return filtered_anime
         except:
             abort(500, 'Something ocurred while searching the anime')
@@ -99,16 +96,24 @@ class Episodes(Resource):
                       },
                       params={
                         'last_id': 'Anime last Id',
-                        'slug': 'Anime name used in AnimeFLV endpoint'
+                        'slug': 'Anime name used in AnimeFLV endpoint',
+                        'page': 'Current page'
                       })
     def post(self):
         params = request.get_json()
         last_id = params['last_id']
         slug = params['slug']
-        if not slug or not last_id:
+        page = params['page']
+        if not slug or not last_id or not page:
             abort(400, 'Bad request')
         try:
-            return scrapeEpisodeList(last_id, slug)
+            episodes = scrapeEpisodeList(last_id, slug)
+            page-=1
+            length = len(episodes)
+            start_range = page * 24
+            end_range = start_range + 24 if start_range + 24 < length else length
+            results = [episodes[i] for i in range(start_range, end_range)]
+            return results
         except:
             abort(500, 'Something ocurred while retrieving the episodes list')
 
@@ -148,15 +153,17 @@ class Genre(Resource):
                           400: 'Bad request',
                           500: 'Internal server error'
                       }, params={
-                          'type': 'Genre type'
+                          'type': 'Genre type',
+                          'page': 'Current page'
                       })
     def post(self):
         params = request.get_json()
         genre_type = params['type']
-        if not genre_type:
+        page = params['page']
+        if not genre_type or not page:
             abort(400, 'Bad request')
         try:
-            return scrapeGenre(genre_type)
+            return scrapeGenre(genre_type, page)
         except:
             abort(500, 'Something ocurred while retrieving animes')
 

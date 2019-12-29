@@ -46,32 +46,23 @@ def scrapeGenreList():
     return genre_list
 
 
-def scrapeSearch(value):
-    return getSearchResults(value, 'buscar')
+def scrapeSearch(value, page):
+    return getSearchResults(value, 'buscar', page)
 
 
-def scrapeList():
-    results = []
-    for letter in ascii_uppercase:
-        results.extend(getSearchResults(letter, 'letra'))
-    results.extend(getSearchResults('0-9', 'letra'))
-    return results
+def scrapeGenre(value, page):
+    return getSearchResults(value, 'genero', page)
 
 
-def scrapeGenre(value):
-    return getSearchResults(value, 'genero')
-
-
-def scrapeEpisodeList(slug):
+def scrapeEpisodeList(slug, page):
     response = cfscraper.get('https://jkanime.net/{}/'.format(slug), headers=headers)
     if response.status_code != 200:
         return []
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
     title, synopsis = getAnimeInfo(soup)
-    pagination = getPagination(soup)
     endpoint = getEpisodeEndpoint(soup)
-    episodes = getEpisodes(endpoint, pagination)
+    episodes = getEpisodes(endpoint, page)
     return {
         'title': title,
         'synopsis': synopsis,
@@ -125,12 +116,6 @@ def getServerNames(soup):
     return server_names
 
 
-def getPagination(soup):
-    nav_div_tag = soup.find('div', class_='navigation')
-    a_array = nav_div_tag.findAll('a')
-    return len(a_array)
-
-
 def getEpisodeEndpoint(soup):
     var_pattern = re.compile(r'var invertir = .')
     container_div_tag = soup.find('div', id='container')
@@ -141,17 +126,14 @@ def getEpisodeEndpoint(soup):
     return endpoint
 
 
-def getEpisodes(endpoint, pagination):
-    episodes = []
-    for i in range(1, pagination + 1):
-        response = cfscraper.get(endpoint.format(i), headers=headers)
-        if response.status_code != 200:
-            continue
-        json_response = response.json()
-        pag_episodes = json_response
-        episodes_info = [{'no_episode': episode['number']} for episode in pag_episodes]
-        episodes.extend(episodes_info)
-    return episodes
+def getEpisodes(endpoint, page):
+    response = cfscraper.get(endpoint.format(page), headers=headers)
+    if response.status_code != 200:
+        return []
+    json_response = response.json()
+    pag_episodes = json_response
+    episodes_info = [{'no_episode': episode['number']} for episode in pag_episodes]
+    return episodes_info
 
 
 def getEpisodeInfo(a_tag):
@@ -171,32 +153,27 @@ def getAnimeInfo(soup):
     return title, synopsis
 
 
-def getSearchResults(value, option):
-    page = 1
-    results = []
-    while True:
-        response = cfscraper.get('https://jkanime.net/{}/{}/{}/'.format(option, value, page), headers=headers)
-        if response.status_code != 200:
-            return []
-        html_file = response.text
-        soup = BeautifulSoup(html_file, 'html.parser')
-        div_array = soup.findAll('div', class_='portada-box')
-        if not div_array:
-            break
-        page_results = []
-        for div_tag in div_array:
-            a_tag = div_tag.find('a')
-            title, slug, no_episode = getEpisodeInfo(a_tag)
-            anime = {
-                'title': title,
-                'slug': slug
-            }
-            if not slug:
-                continue
-            page_results.append(anime)
-        results.extend(page_results)
-        page+=1
-    return results
+def getSearchResults(value, option, page):
+    response = cfscraper.get('https://jkanime.net/{}/{}/{}/'.format(option, value, page), headers=headers)
+    if response.status_code != 200:
+        return []
+    html_file = response.text
+    soup = BeautifulSoup(html_file, 'html.parser')
+    div_array = soup.findAll('div', class_='portada-box')
+    if not div_array:
+        return []
+    page_results = []
+    for div_tag in div_array:
+        a_tag = div_tag.find('a')
+        title, slug, no_episode = getEpisodeInfo(a_tag)
+        anime = {
+            'title': title,
+            'slug': slug
+        }
+        if not slug:
+            continue
+        page_results.append(anime)
+    return page_results
 
 
 def videoExists(element):

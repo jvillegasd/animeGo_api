@@ -1,21 +1,24 @@
 from flask import request
 from flask_restplus import Namespace, Resource, abort, fields
-from Servers.JKanime.scraper import scrapeFeed, scrapeGenreList, scrapeSearch, scrapeList, scrapeGenre, scrapeEpisodeList, scrapeEpisode
+from Servers.JKanime.scraper import scrapeFeed, scrapeGenreList, scrapeSearch, scrapeGenre, scrapeEpisodeList, scrapeEpisode
 
 jkanime_api = Namespace('JKanime', description='JKanime API')
 
 search_model = jkanime_api.model('Search JKanime', {
-    'value': fields.String
+    'value': fields.String,
+    'page': fields.Integer
 })
 episodes_list_model = jkanime_api.model('Episodes List JKanime', {
-    'slug': fields.String
+    'slug': fields.String,
+    'page': fields.Integer
 })
 watch_episode_model = jkanime_api.model('Watch Episode JKanime', {
     'slug': fields.String,
     'no_episode': fields.Integer
 })
 genre_model = jkanime_api.model('Genre search JKanime', {
-    'type': fields.String
+    'type': fields.String,
+    'page': fields.Integer
 })
 
 @jkanime_api.route('/')
@@ -64,30 +67,20 @@ class Search(Resource):
                           400: 'Bad request',
                           500: 'Internal server error'
                       },
-                      params={'value': 'String to search in JKanime'})
+                      params={
+                        'value': 'String to search in JKanime',
+                        'page': 'Current page'
+                      })
     def post(self):
         params = request.get_json()
         anime_name = params['value']
-        if not anime_name:
+        page = params['page']
+        if not anime_name or not page:
             abort(400, 'Bad request')
         try:
-            return scrapeSearch(anime_name)
+            return scrapeSearch(anime_name, page)
         except:
             abort(500, 'Something ocurred while searching the anime')
-
-
-@jkanime_api.route('/list')
-class List(Resource):
-    @jkanime_api.doc(description='Get JKanime anime library',
-                      responses={
-                          200: 'Request was successful',
-                          500: 'Internal server error'
-                      })
-    def get(self):
-        try:
-            return scrapeList()
-        except:
-            abort(500, 'Something ocurred while retrieving all anime list')
 
 
 @jkanime_api.route('/genre')
@@ -99,15 +92,17 @@ class Genre(Resource):
                           400: 'Bad request',
                           500: 'Internal server error'
                       }, params={
-                          'type': 'Genre type'
+                          'type': 'Genre type',
+                          'page': 'Current page'
                       })
     def post(self):
         params = request.get_json()
         genre_type = params['type']
-        if not genre_type:
+        page = params['page']
+        if not genre_type or not page:
             abort(400, 'Bad request')
         try:
-            return scrapeGenre(genre_type)
+            return scrapeGenre(genre_type, page)
         except:
             abort(500, 'Something ocurred while retrieving animes')
 
@@ -122,15 +117,17 @@ class Episodes(Resource):
                         500: 'Internal server error'
                       },
                       params={
-                        'slug': 'Anime name used in JKanime endpoint'
+                        'slug': 'Anime name used in JKanime endpoint',
+                        'page': 'Current page'
                       })
     def post(self):
         params = request.get_json()
         slug = params['slug']
-        if not slug:
+        page = params['page']
+        if not slug or not page:
             abort(400, 'Bad request')
         try:
-            return scrapeEpisodeList(slug)
+            return scrapeEpisodeList(slug, page)
         except:
             abort(500, 'Something ocurred while retrieving the episodes list')
 

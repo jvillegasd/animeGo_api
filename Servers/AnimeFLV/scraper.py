@@ -32,11 +32,8 @@ def scrapeEpisode(id_episode, slug, no_episode):
     return getStreamOptions(soup)
 
 
-def scrapeGenre(genre):
-    pagination = getPagination(genre)
-    animes = []
-    for i in range(1, pagination + 1):
-        animes.append(getResults(genre, i))
+def scrapeGenre(genre, page):
+    animes = getResults(genre, page)
     return animes
 
 
