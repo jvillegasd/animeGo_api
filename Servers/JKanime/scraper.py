@@ -116,7 +116,7 @@ def scrapeEpisode(slug, no_episode):
 
 def scrapeLastAnimeAdded():
     response = cfscraper.get('https://jkanime.net', headers=randomUserAgent())
-    if response.status_code != []:
+    if response.status_code != 200:
         return []
     html_file = response.content
     soup = BeautifulSoup(html_file, 'html.parser')
