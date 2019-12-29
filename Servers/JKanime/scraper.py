@@ -132,6 +132,8 @@ def scrapeLastAnimeAdded():
           'description': description,
           'image': image
         }
+        last_anime_added.append(anime)
+    return last_anime_added
 
 
 def getLastAnimeInfo(a_tag):
