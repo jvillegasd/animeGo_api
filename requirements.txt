@@ -6,8 +6,12 @@ cfscrape==2.0.8
 chardet==3.0.4
 Click==7.0
 clickclick==1.2.2
+cssselect==1.1.0
 Flask==1.1.1
 flask-restplus==0.13.0
+gevent==1.4.0
+greenlet==0.4.15
+gunicorn==20.0.4
 idna==2.8
 importlib-metadata==1.2.0
 inflection==0.3.1
@@ -16,6 +20,7 @@ Jinja2==2.10.3
 jsonschema==3.2.0
 MarkupSafe==1.1.1
 more-itertools==8.0.2
+multidict==4.7.0
 openapi-spec-validator==0.2.8
 ply==3.11
 pyjsparser==2.7.1
@@ -23,8 +28,11 @@ pyrsistent==0.15.6
 pytz==2019.3
 PyYAML==5.2
 requests==2.22.0
+ruia==0.6.3
 six==1.13.0
 soupsieve==1.9.5
 urllib3==1.25.7
+uvloop==0.14.0
 Werkzeug==0.16.0
+yarl==1.4.2
 zipp==0.6.0
