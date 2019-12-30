@@ -4,14 +4,14 @@ services:
     image: nginx:1.16.1
     container_name: nginx
     depends_on:
-      - ubuntuflask
+      - flask
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - api-network
     ports:
       - 80:80
-  ubuntuflask:
+  flask:
     build:
       context: ./
       dockerfile: animego_Dockerfile
