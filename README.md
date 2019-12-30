@@ -10,6 +10,6 @@ This web application uses Docker for deployment. There are two containers over t
 docker-compose up -d
 ```
 ## 1.2 Docker Old Files folder <br>
-This folder contains docker files with low size containers. Use if you do not have to scrape on sites with CloudFlare's IUAM protection. <br>
+This folder contains docker files with low size containers. Use it if you do not have to scrape on sites with CloudFlare's IUAM protection. <br>
 # 2. API Documentation <br>
 The endpoint ```http://{your host ip}/swagger.json``` gives you the documentation. Also, you can read it in ```api_doc.json``` file on this repo.
