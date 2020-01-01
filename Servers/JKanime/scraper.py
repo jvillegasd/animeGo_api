@@ -214,7 +214,7 @@ def getSearchResults(value, option, page):
     page_results = []
     for div_tag in div_array:
         a_tag = div_tag.find('a', {'rel': 'nofollow'})
-        title, slug, no_episode = getEpisodeInfo(a_tag)
+        title, slug, no_episode, image = getEpisodeInfo(a_tag)
         anime = {
             'title': title,
             'slug': slug
