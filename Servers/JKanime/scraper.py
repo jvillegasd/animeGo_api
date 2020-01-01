@@ -190,7 +190,7 @@ def getEpisodeInfo(a_tag):
     splitted_href = href.split('/')
     slug = splitted_href[3]
     no_episode = splitted_href[4]
-    image = (a_tag.find('img'))['src']
+    image = (a_tag.find('img', ))['src']
     return title, slug, no_episode, image
 
 
@@ -213,7 +213,7 @@ def getSearchResults(value, option, page):
         return []
     page_results = []
     for div_tag in div_array:
-        a_tag = div_tag.find('a')
+        a_tag = div_tag.find('a', {'rel': 'nofollow'})
         title, slug, no_episode = getEpisodeInfo(a_tag)
         anime = {
             'title': title,
