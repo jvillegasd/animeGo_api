@@ -140,7 +140,7 @@ def getLastAnimeInfo(a_tag):
     title = a_tag['title']
     splitted_href = a_tag['href'].split('/')
     slug = splitted_href[3]
-    image = (a_tag.find('img'))['src']
+    image = (a_tag.find('img', ))['src']
     description = 'Sipnosis disponible en su pagina respectiva.'
     return [title, slug, image, description]
 
@@ -190,7 +190,7 @@ def getEpisodeInfo(a_tag):
     splitted_href = href.split('/')
     slug = splitted_href[3]
     no_episode = splitted_href[4]
-    image = (a_tag.find('img'))['src']
+    image = (a_tag.find('img', ))['src']
     return title, slug, no_episode, image
 
 
@@ -213,8 +213,8 @@ def getSearchResults(value, option, page):
         return []
     page_results = []
     for div_tag in div_array:
-        a_tag = div_tag.find('a')
-        title, slug, no_episode = getEpisodeInfo(a_tag)
+        a_tag = div_tag.find('a', {'rel': 'nofollow'})
+        title, slug, no_episode, image = getEpisodeInfo(a_tag)
         anime = {
             'title': title,
             'slug': slug
