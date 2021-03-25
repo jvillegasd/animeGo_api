@@ -21,7 +21,7 @@ ply==3.11
 pyjsparser==2.7.1
 pyrsistent==0.15.6
 pytz==2019.3
-PyYAML==5.2
+PyYAML==5.4
 requests==2.22.0
 six==1.13.0
 soupsieve==1.9.5
